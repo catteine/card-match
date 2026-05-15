@@ -1,29 +1,46 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
+import React, { useState, useEffect, useCallback } from "react";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-// 16마리 전체 목록
+// 스프라이트: 1024×1024, 4×4 그리드, 셀 1개 = 256×256px
+// 디스플레이 크기 64px → background-size: 256px (4×64)
+const SPRITE_CELL = 256;
+const DISPLAY_SIZE = 64;
+const SPRITE_SCALE = DISPLAY_SIZE / SPRITE_CELL; // 0.25
+
+// 16마리 전체 목록 (col, row = 스프라이트 그리드 위치)
 const ALL_ANIMALS = [
-  { id: "fox",      name: "여우"   },
-  { id: "cat",      name: "고양이" },
-  { id: "bear",     name: "곰"     },
-  { id: "rabbit",   name: "토끼"   },
-  { id: "panda",    name: "판다"   },
-  { id: "tiger",    name: "호랑이" },
-  { id: "penguin",  name: "펭귄"   },
-  { id: "frog",     name: "개구리" },
-  { id: "lion",     name: "사자"   },
-  { id: "monkey",   name: "원숭이" },
-  { id: "sheep",    name: "양"     },
-  { id: "pig",      name: "돼지"   },
-  { id: "elephant", name: "코끼리" },
-  { id: "koala",    name: "코알라" },
-  { id: "chick",    name: "병아리" },
-  { id: "raccoon",  name: "너구리" },
+  { id: "fox",      name: "여우",   col: 0, row: 0 },
+  { id: "cat",      name: "고양이", col: 1, row: 0 },
+  { id: "bear",     name: "곰",     col: 2, row: 0 },
+  { id: "rabbit",   name: "토끼",   col: 3, row: 0 },
+  { id: "panda",    name: "판다",   col: 0, row: 1 },
+  { id: "tiger",    name: "호랑이", col: 1, row: 1 },
+  { id: "penguin",  name: "펭귄",   col: 2, row: 1 },
+  { id: "frog",     name: "개구리", col: 3, row: 1 },
+  { id: "lion",     name: "사자",   col: 0, row: 2 },
+  { id: "monkey",   name: "원숭이", col: 1, row: 2 },
+  { id: "sheep",    name: "양",     col: 2, row: 2 },
+  { id: "pig",      name: "돼지",   col: 3, row: 2 },
+  { id: "elephant", name: "코끼리", col: 0, row: 3 },
+  { id: "koala",    name: "코알라", col: 1, row: 3 },
+  { id: "chick",    name: "병아리", col: 2, row: 3 },
+  { id: "raccoon",  name: "너구리", col: 3, row: 3 },
 ];
+
+function getSpriteStyle(col: number, row: number): React.CSSProperties {
+  const bgSize = SPRITE_CELL * 4 * SPRITE_SCALE; // 256px
+  return {
+    backgroundImage: `url('${BASE_PATH}/spr_card_animals.png')`,
+    backgroundSize: `${bgSize}px ${bgSize}px`,
+    backgroundPosition: `-${col * DISPLAY_SIZE}px -${row * DISPLAY_SIZE}px`,
+    backgroundRepeat: "no-repeat",
+    width: `${DISPLAY_SIZE}px`,
+    height: `${DISPLAY_SIZE}px`,
+  };
+}
 
 // 매 게임마다 16마리 중 8마리 랜덤 선택
 function pickAnimals() {
@@ -37,6 +54,8 @@ type Card = {
   uid: number;
   animalId: string;
   name: string;
+  col: number;
+  row: number;
   isFlipped: boolean;
   isMatched: boolean;
 };
@@ -58,6 +77,8 @@ function createCards(): Card[] {
     uid: idx,
     animalId: animal.id,
     name: animal.name,
+    col: animal.col,
+    row: animal.row,
     isFlipped: false,
     isMatched: false,
   }));
@@ -257,17 +278,14 @@ export default function CardMatchGame() {
                       : "rotateY(180deg)",
                 }}
               >
-                {/* Front face — individual image */}
+                {/* Front face — sprite */}
                 <div
                   className="absolute inset-0 rounded-2xl bg-white shadow-inner flex items-center justify-center"
                   style={{ backfaceVisibility: "hidden" }}
                 >
-                  <Image
-                    src={`${BASE_PATH}/animals/${card.animalId}.png`}
-                    alt={card.name}
-                    width={56}
-                    height={56}
+                  <div
                     className={`transition-transform ${card.isMatched ? "scale-90" : "scale-100"}`}
+                    style={getSpriteStyle(card.col, card.row)}
                   />
                   {card.isMatched && (
                     <span className="absolute top-1 right-1 text-xs">✅</span>
