@@ -1,25 +1,53 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
-const ANIMALS = [
-  { id: "lion", emoji: "🦁", name: "사자" },
-  { id: "elephant", emoji: "🐘", name: "코끼리" },
-  { id: "penguin", emoji: "🐧", name: "펭귄" },
-  { id: "fox", emoji: "🦊", name: "여우" },
-  { id: "panda", emoji: "🐼", name: "판다" },
-  { id: "frog", emoji: "🐸", name: "개구리" },
-  { id: "tiger", emoji: "🐯", name: "호랑이" },
-  { id: "rabbit", emoji: "🐰", name: "토끼" },
+// 16마리 전체 목록 — 스프라이트 4×4 그리드 (col, row)
+const ALL_ANIMALS = [
+  { id: "fox",      name: "여우",   col: 0, row: 0 },
+  { id: "cat",      name: "고양이", col: 1, row: 0 },
+  { id: "bear",     name: "곰",     col: 2, row: 0 },
+  { id: "rabbit",   name: "토끼",   col: 3, row: 0 },
+  { id: "panda",    name: "판다",   col: 0, row: 1 },
+  { id: "tiger",    name: "호랑이", col: 1, row: 1 },
+  { id: "penguin",  name: "펭귄",   col: 2, row: 1 },
+  { id: "frog",     name: "개구리", col: 3, row: 1 },
+  { id: "lion",     name: "사자",   col: 0, row: 2 },
+  { id: "monkey",   name: "원숭이", col: 1, row: 2 },
+  { id: "sheep",    name: "양",     col: 2, row: 2 },
+  { id: "pig",      name: "돼지",   col: 3, row: 2 },
+  { id: "elephant", name: "코끼리", col: 0, row: 3 },
+  { id: "koala",    name: "코알라", col: 1, row: 3 },
+  { id: "chick",    name: "병아리", col: 2, row: 3 },
+  { id: "raccoon",  name: "너구리", col: 3, row: 3 },
 ];
+
+// 스프라이트에서 해당 동물의 CSS background 위치 계산
+function getSpriteStyle(col: number, row: number): React.CSSProperties {
+  const xPct = (col / 3) * 100;
+  const yPct = (row / 3) * 100;
+  return {
+    backgroundImage: "url('/animals.png')",
+    backgroundSize: "400% 400%",
+    backgroundPosition: `${xPct}% ${yPct}%`,
+    backgroundRepeat: "no-repeat",
+  };
+}
+
+// 매 게임마다 16마리 중 8마리 랜덤 선택
+function pickAnimals() {
+  const shuffled = [...ALL_ANIMALS].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 8);
+}
 
 const WAVE_PATTERN = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='12'%3E%3Cpath d='M0 6 C10 0%2C 20 12%2C 40 6' stroke='%23fdba74' stroke-width='1.5' fill='none' opacity='0.6'/%3E%3C/svg%3E")`;
 
 type Card = {
   uid: number;
   animalId: string;
-  emoji: string;
   name: string;
+  col: number;
+  row: number;
   isFlipped: boolean;
   isMatched: boolean;
 };
@@ -36,11 +64,13 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function createCards(): Card[] {
-  const doubled = [...ANIMALS, ...ANIMALS].map((animal, idx) => ({
+  const animals = pickAnimals();
+  const doubled = [...animals, ...animals].map((animal, idx) => ({
     uid: idx,
     animalId: animal.id,
-    emoji: animal.emoji,
     name: animal.name,
+    col: animal.col,
+    row: animal.row,
     isFlipped: false,
     isMatched: false,
   }));
@@ -240,14 +270,15 @@ export default function CardMatchGame() {
                       : "rotateY(180deg)",
                 }}
               >
-                {/* Front face — emoji */}
+                {/* Front face — sprite */}
                 <div
-                  className="absolute inset-0 rounded-2xl bg-white shadow-inner flex items-center justify-center text-4xl sm:text-5xl"
+                  className="absolute inset-0 rounded-2xl bg-white shadow-inner flex items-center justify-center"
                   style={{ backfaceVisibility: "hidden" }}
                 >
-                  <span className={card.isMatched ? "scale-90" : "scale-100"}>
-                    {card.emoji}
-                  </span>
+                  <div
+                    className={`w-12 h-12 sm:w-14 sm:h-14 transition-transform ${card.isMatched ? "scale-90" : "scale-100"}`}
+                    style={getSpriteStyle(card.col, card.row)}
+                  />
                   {card.isMatched && (
                     <span className="absolute top-1 right-1 text-xs">✅</span>
                   )}
