@@ -22,12 +22,14 @@ const ALL_ANIMALS = [
   { id: "raccoon",  name: "너구리", col: 3, row: 3 },
 ];
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 // 스프라이트에서 해당 동물의 CSS background 위치 계산
 function getSpriteStyle(col: number, row: number): React.CSSProperties {
   const xPct = (col / 3) * 100;
   const yPct = (row / 3) * 100;
   return {
-    backgroundImage: "url('/animals.png')",
+    backgroundImage: `url('${BASE_PATH}/animals.png')`,
     backgroundSize: "400% 400%",
     backgroundPosition: `${xPct}% ${yPct}%`,
     backgroundRepeat: "no-repeat",
@@ -156,7 +158,7 @@ export default function CardMatchGame() {
   };
 
   const matchedCount = cards.filter((c) => c.isMatched).length;
-  const totalPairs = ANIMALS.length;
+  const totalPairs = 8;
 
   return (
     <div className="flex flex-col items-center min-h-screen py-10 px-4">
