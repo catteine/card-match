@@ -1,40 +1,29 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-
-// 16마리 전체 목록 — 스프라이트 4×4 그리드 (col, row)
-const ALL_ANIMALS = [
-  { id: "fox",      name: "여우",   col: 0, row: 0 },
-  { id: "cat",      name: "고양이", col: 1, row: 0 },
-  { id: "bear",     name: "곰",     col: 2, row: 0 },
-  { id: "rabbit",   name: "토끼",   col: 3, row: 0 },
-  { id: "panda",    name: "판다",   col: 0, row: 1 },
-  { id: "tiger",    name: "호랑이", col: 1, row: 1 },
-  { id: "penguin",  name: "펭귄",   col: 2, row: 1 },
-  { id: "frog",     name: "개구리", col: 3, row: 1 },
-  { id: "lion",     name: "사자",   col: 0, row: 2 },
-  { id: "monkey",   name: "원숭이", col: 1, row: 2 },
-  { id: "sheep",    name: "양",     col: 2, row: 2 },
-  { id: "pig",      name: "돼지",   col: 3, row: 2 },
-  { id: "elephant", name: "코끼리", col: 0, row: 3 },
-  { id: "koala",    name: "코알라", col: 1, row: 3 },
-  { id: "chick",    name: "병아리", col: 2, row: 3 },
-  { id: "raccoon",  name: "너구리", col: 3, row: 3 },
-];
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-// 스프라이트에서 해당 동물의 CSS background 위치 계산
-function getSpriteStyle(col: number, row: number): React.CSSProperties {
-  const xPct = (col / 3) * 100;
-  const yPct = (row / 3) * 100;
-  return {
-    backgroundImage: `url('${BASE_PATH}/animals.png')`,
-    backgroundSize: "400% 400%",
-    backgroundPosition: `${xPct}% ${yPct}%`,
-    backgroundRepeat: "no-repeat",
-  };
-}
+// 16마리 전체 목록
+const ALL_ANIMALS = [
+  { id: "fox",      name: "여우"   },
+  { id: "cat",      name: "고양이" },
+  { id: "bear",     name: "곰"     },
+  { id: "rabbit",   name: "토끼"   },
+  { id: "panda",    name: "판다"   },
+  { id: "tiger",    name: "호랑이" },
+  { id: "penguin",  name: "펭귄"   },
+  { id: "frog",     name: "개구리" },
+  { id: "lion",     name: "사자"   },
+  { id: "monkey",   name: "원숭이" },
+  { id: "sheep",    name: "양"     },
+  { id: "pig",      name: "돼지"   },
+  { id: "elephant", name: "코끼리" },
+  { id: "koala",    name: "코알라" },
+  { id: "chick",    name: "병아리" },
+  { id: "raccoon",  name: "너구리" },
+];
 
 // 매 게임마다 16마리 중 8마리 랜덤 선택
 function pickAnimals() {
@@ -48,8 +37,6 @@ type Card = {
   uid: number;
   animalId: string;
   name: string;
-  col: number;
-  row: number;
   isFlipped: boolean;
   isMatched: boolean;
 };
@@ -71,8 +58,6 @@ function createCards(): Card[] {
     uid: idx,
     animalId: animal.id,
     name: animal.name,
-    col: animal.col,
-    row: animal.row,
     isFlipped: false,
     isMatched: false,
   }));
@@ -272,14 +257,17 @@ export default function CardMatchGame() {
                       : "rotateY(180deg)",
                 }}
               >
-                {/* Front face — sprite */}
+                {/* Front face — individual image */}
                 <div
                   className="absolute inset-0 rounded-2xl bg-white shadow-inner flex items-center justify-center"
                   style={{ backfaceVisibility: "hidden" }}
                 >
-                  <div
-                    className={`w-12 h-12 sm:w-14 sm:h-14 transition-transform ${card.isMatched ? "scale-90" : "scale-100"}`}
-                    style={getSpriteStyle(card.col, card.row)}
+                  <Image
+                    src={`${BASE_PATH}/animals/${card.animalId}.png`}
+                    alt={card.name}
+                    width={56}
+                    height={56}
+                    className={`transition-transform ${card.isMatched ? "scale-90" : "scale-100"}`}
                   />
                   {card.isMatched && (
                     <span className="absolute top-1 right-1 text-xs">✅</span>
